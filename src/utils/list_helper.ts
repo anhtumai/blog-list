@@ -1,4 +1,5 @@
 import * as _ from 'lodash'
+import { max } from 'lodash'
 
 export interface Blog {
     _id: string
@@ -46,10 +47,38 @@ function mostBlogs(blogs: Blog[]): AuthorWithBlogsNum | null {
         blogs: Number(numberOfBlogs),
     }
 }
+type AuthorWithLikes = {
+    author: string
+    likes: number
+}
 
+function mostLikes(blogs: Blog[]): AuthorWithLikes | null {
+    if (blogs.length === 0) return null
+    let author = blogs[0].author
+    let maxLikes = blogs[0].likes
+    const likesMap = new Map<string, number>()
+
+    for (const blog of blogs) {
+        if (likesMap.has(blog.author)) {
+            likesMap.set(blog.author, likesMap.get(blog.author) + blog.likes)
+        } else {
+            likesMap.set(blog.author, blog.likes)
+        }
+        if (likesMap.get(blog.author) > maxLikes) {
+            maxLikes = likesMap.get(blog.author)
+            author = blog.author
+        }
+    }
+
+    return {
+        author,
+        likes: maxLikes,
+    }
+}
 export default {
     dummy,
     totalLikes,
     favoriteBlog,
     mostBlogs,
+    mostLikes,
 }

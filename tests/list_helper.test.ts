@@ -50,6 +50,19 @@ const blogs = [
         __v: 0,
     },
 ]
+
+const secondBlogs = [
+    ...blogs,
+    {
+        _id: 'doesnot matter at all',
+        title: 'FP vs. OO',
+        author: 'Robert C. Martin',
+        url: 'https://blog.cleancoder.com/uncle-bob/2018/04/13/FPvsOO.html',
+        likes: 8,
+        __v: 0,
+    },
+]
+
 test('dummy returns one', () => {
     const blogs = []
 
@@ -97,5 +110,20 @@ describe('most blogs', () => {
         const result = listHelper.mostBlogs(blogs)
         expect(result.author).toEqual('Robert C. Martin')
         expect(result.blogs).toEqual(3)
+    })
+})
+
+describe('most likes', () => {
+    test('most likes helper with blogs input', () => {
+        const result = listHelper.mostLikes(blogs)
+        console.log(blogs)
+        expect(result.author).toEqual('Edsger W. Dijkstra')
+        expect(result.likes).toEqual(17)
+    })
+    test('most likes helper with second blogs input ', () => {
+        const result = listHelper.mostLikes(secondBlogs)
+        console.log(secondBlogs)
+        expect(result.author).toEqual('Robert C. Martin')
+        expect(result.likes).toEqual(20)
     })
 })
