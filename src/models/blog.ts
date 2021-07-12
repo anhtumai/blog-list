@@ -26,7 +26,7 @@ mongoose
         console.log('error connecting to MongoDB:', error.message)
     })
 
-const blogSchema = new mongoose.Schema({
+const blogSchema = new mongoose.Schema<BlogDocument>({
     title: String,
     author: String,
     url: String,
