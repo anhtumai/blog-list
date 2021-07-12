@@ -1,3 +1,5 @@
+import * as _ from 'lodash'
+
 export interface Blog {
     _id: string
     title: string
@@ -27,8 +29,27 @@ function favoriteBlog(blogs: Blog[]) {
     )
 }
 
+type AuthorWithBlogsNum = {
+    author: string
+    blogs: number
+}
+
+function mostBlogs(blogs: Blog[]): AuthorWithBlogsNum | null {
+    if (blogs.length === 0) return null
+    const [author, numberOfBlogs] = _.chain(_.map(blogs, 'author'))
+        .countBy()
+        .toPairs()
+        .maxBy(_.last)
+        .value()
+    return {
+        author: String(author),
+        blogs: Number(numberOfBlogs),
+    }
+}
+
 export default {
     dummy,
     totalLikes,
     favoriteBlog,
+    mostBlogs,
 }
