@@ -32,7 +32,6 @@ describe('Test get request on /api/blogs', () => {
     test('a specific blog is within the returned blogs', async () => {
         const response = await api.get('/api/blogs')
 
-        console.log(response.body)
         const contents = response.body.map((blog) => blog.title)
         expect(contents).toContain('Type wars')
     })
@@ -47,6 +46,24 @@ describe('Test get request on /api/blogs', () => {
         expect(firstBlog.id).toBeDefined()
         expect(typeof firstBlog.id).toBe('string')
     })
+})
+
+test('if length of blogs increase by 1 when making a post request', async () => {
+    const newBlog = {
+        title: 'FP vs. OO',
+        author: 'Robert C. Martin',
+        url: 'https://blog.cleancoder.com/uncle-bob/2018/04/13/FPvsOO.html',
+        likes: 8,
+    }
+
+    const response = await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const currentBlogs = await BlogModel.find({})
+    expect(currentBlogs).toHaveLength(initialBlogs.length + 1)
 })
 
 afterAll(() => {
