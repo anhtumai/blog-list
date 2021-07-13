@@ -12,9 +12,14 @@ blogsRouter.get('/', (req, res) => {
 blogsRouter.post('/', (req, res) => {
     const blog = new BlogModel(req.body)
 
-    blog.save().then((result) => {
-        res.status(201).json(result)
-    })
+    blog.save()
+        .then((result) => {
+            res.status(201).json(result)
+        })
+        .catch((err) => {
+            console.log(err.message)
+            res.status(400).end()
+        })
 })
 
 export default blogsRouter
