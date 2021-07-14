@@ -118,6 +118,32 @@ describe('Test DELETE request', () => {
     })
 })
 
+describe('Test PUT request', () => {
+    test('PUT request', async () => {
+        const selectedBlog = {
+            likes: 5,
+            title: 'Go To Statement Considered Harmful',
+            author: 'Edsger W. Dijkstra',
+            url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+        }
+
+        const newLikes = 100
+
+        const selectedBlogsInDb = await BlogModel.find(selectedBlog)
+        const id = selectedBlogsInDb[0]._id
+
+        await api
+            .put(`/api/blogs/${id}`)
+            .send({ ...selectedBlog, likes: newLikes })
+            .expect(201)
+
+        const blogAfterUpdate = (
+            await BlogModel.find({ title: selectedBlog.title })
+        )[0]
+        expect((blogAfterUpdate as any).likes).toEqual(newLikes)
+    })
+})
+
 afterAll(() => {
     mongoose.connection.close()
 })
