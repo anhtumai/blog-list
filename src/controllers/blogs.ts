@@ -3,23 +3,25 @@ import BlogModel from '../models/blog'
 
 const blogsRouter = Router()
 
-blogsRouter.get('/', (req, res) => {
-    BlogModel.find({}).then((blogs) => {
-        res.json(blogs)
-    })
+blogsRouter.get('/', async (req, res) => {
+    try {
+        const blogs = await BlogModel.find({})
+        return res.json(blogs)
+    } catch (err) {
+        return res.status(500).end()
+    }
 })
 
-blogsRouter.post('/', (req, res) => {
+blogsRouter.post('/', async (req, res) => {
     const blog = new BlogModel(req.body)
 
-    blog.save()
-        .then((result) => {
-            res.status(201).json(result)
-        })
-        .catch((err) => {
-            console.log(err.message)
-            res.status(400).end()
-        })
+    try {
+        const result = await blog.save()
+        return res.status(201).json(result)
+    } catch (err) {
+        console.log(err.message)
+        return res.status(400).end()
+    }
 })
 
 blogsRouter.delete('/:id', async (req, res) => {
