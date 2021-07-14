@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import BlogModel from '../models/blog'
 
+import logger from '../utils/logger'
+
 const blogsRouter = Router()
 
 blogsRouter.get('/', async (req, res) => {
@@ -19,7 +21,7 @@ blogsRouter.post('/', async (req, res) => {
         const result = await blog.save()
         return res.status(201).json(result)
     } catch (err) {
-        console.log(err.message)
+        logger.error(err.message)
         return res.status(400).end()
     }
 })
@@ -37,7 +39,7 @@ blogsRouter.delete('/:id', async (req, res) => {
                 .json({ error: `Record with ${id} does not exist` })
         }
     } catch (err) {
-        console.log(err.message)
+        logger.error(err.message)
         return res.status(400).end()
     }
 })
@@ -68,7 +70,7 @@ blogsRouter.put('/:id', async (req, res) => {
             return res.status(404).end()
         }
     } catch (err) {
-        console.log(err.message)
+        logger.error(err.message)
         return res.status(400).end()
     }
 })
