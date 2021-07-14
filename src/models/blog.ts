@@ -1,7 +1,4 @@
 import mongoose from 'mongoose'
-import dotenv from 'dotenv'
-
-dotenv.config()
 
 export interface BlogDocument extends mongoose.Document {
     title: string
@@ -9,22 +6,6 @@ export interface BlogDocument extends mongoose.Document {
     url: string
     likes: number
 }
-
-const url = process.env.MONGODB_URI
-
-mongoose
-    .connect(url, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useFindAndModify: false,
-        useCreateIndex: true,
-    })
-    .then((result) => {
-        console.log('Connect to MongoDB')
-    })
-    .catch((error) => {
-        console.log('error connecting to MongoDB:', error.message)
-    })
 
 const blogSchema = new mongoose.Schema<BlogDocument>({
     title: {
