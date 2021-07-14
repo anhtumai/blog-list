@@ -11,9 +11,16 @@ const userSchema = new mongoose.Schema<UserDocument>({
     username: {
         type: String,
         unique: true,
+        required: true,
     },
-    name: String,
-    passwordHash: String,
+    name: {
+        type: String,
+        required: true,
+    },
+    passwordHash: {
+        type: String,
+        required: true,
+    },
 })
 
 userSchema.plugin(uniqueValidator)

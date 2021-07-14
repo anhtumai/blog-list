@@ -3,7 +3,10 @@ import mongoose from 'mongoose'
 import cors from 'cors'
 
 import blogsRouter from './controllers/blogs'
+import usersRouter from './controllers/users'
+
 import config from './utils/config'
+import logger from './utils/logger'
 
 const app = express()
 
@@ -17,15 +20,16 @@ mongoose
         useCreateIndex: true,
     })
     .then((result) => {
-        console.log('Connect to MongoDB')
+        logger.info('Connect to MongoDB')
     })
     .catch((error) => {
-        console.log('error connecting to MongoDB:', error.message)
+        logger.info('error connecting to MongoDB:', error.message)
     })
 
 app.use(cors())
 app.use(express.json())
 
 app.use('/api/blogs', blogsRouter)
+app.use('/api/users', usersRouter)
 
 export default app
