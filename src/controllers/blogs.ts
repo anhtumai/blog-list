@@ -22,4 +22,22 @@ blogsRouter.post('/', (req, res) => {
         })
 })
 
+blogsRouter.delete('/:id', async (req, res) => {
+    const { id } = req.params
+
+    try {
+        const deletedBlog = await BlogModel.findByIdAndRemove(id)
+        if (deletedBlog) {
+            return res.status(204).end()
+        } else {
+            return res
+                .status(404)
+                .json({ error: `Record with ${id} does not exist` })
+        }
+    } catch (err) {
+        console.log(err.message)
+        return res.status(400).end()
+    }
+})
+
 export default blogsRouter

@@ -100,6 +100,19 @@ describe('Test POST request on /api/blogs', () => {
     })
 })
 
+test('DELETE request', async () => {
+    const bookName = 'React patterns'
+
+    const deletedBlogs = await BlogModel.find({ title: bookName })
+    const deletedId = deletedBlogs[0]._id
+    await api.delete(`/api/blogs/${deletedId}`).expect(204)
+
+    // check if no book with that name is still present
+    const checkedBlogs = await BlogModel.find({ title: bookName })
+    expect(checkedBlogs).toHaveLength(0)
+
+    await api.delete(`/api/blogs/${deletedId}`).expect(404)
+})
 afterAll(() => {
     mongoose.connection.close()
 })
