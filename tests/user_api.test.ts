@@ -69,6 +69,106 @@ describe('Test get request on /api/users', () => {
     })
 })
 
+describe('Test POST request on /api/users', () => {
+    test('if length of users increase by 1 when making a post request', async () => {
+        const newUser = {
+            username: 'anhtumai',
+            name: 'Anh Tu Mai',
+            password: 'anhtumaipassword',
+        }
+
+        const response = await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const currentUsers = await UserModel.find({})
+        expect(currentUsers).toHaveLength(initialUsers.length + 1)
+    })
+
+    test('if name, username or password property is missing when making a post request, it will return 404 code', async () => {
+        const user1 = {
+            name: 'Anh Tu Mai',
+            password: 'anhtumaipassword',
+        }
+
+        const user2 = {
+            username: 'anhtumai',
+            password: 'anhtumaipassword',
+        }
+
+        const user3 = {
+            name: 'Anh Tu Mai',
+            username: 'anhtumai',
+        }
+
+        const validUser = {
+            name: 'Anh Tu Mai',
+            username: 'anhtumai',
+            password: 'anhtumaipassword',
+        }
+
+        await api.post('/api/users').send(user1).expect(400)
+        await api.post('/api/users').send(user2).expect(400)
+        await api.post('/api/users').send(user3).expect(400)
+    })
+
+    test('if name, username or password property is missing when making a post request, it will return 404 code', async () => {
+        const user1 = {
+            name: 'Anh Tu Mai',
+            password: 'anhtumaipassword',
+        }
+
+        const user2 = {
+            username: 'anhtumai',
+            password: 'anhtumaipassword',
+        }
+
+        const user3 = {
+            name: 'Anh Tu Mai',
+            username: 'anhtumai',
+        }
+
+        const validUser = {
+            name: 'Anh Tu Mai',
+            username: 'anhtumai',
+            password: 'anhtumaipassword',
+        }
+
+        await api.post('/api/users').send(user1).expect(400)
+        await api.post('/api/users').send(user2).expect(400)
+        await api.post('/api/users').send(user3).expect(400)
+    })
+
+    test('if password is too short, status code is 400', async () => {
+        const user = {
+            username: 'anhtumai2',
+            name: 'Tu Mai',
+            password: 'xx',
+        }
+
+        await api.post('/api/users').send(user).expect(400)
+    })
+    test('if username is dupplicated, status code is 400', async () => {
+        const user = {
+            username: 'anhtumai',
+            name: 'Tu Mai',
+            password: 'xxxxxxxxxxxx',
+        }
+
+        await api.post('/api/users').send(user).expect(201)
+        await api.post('/api/users').send(user).expect(400)
+    })
+    test('if username has less than 3 characters, status code is 400', async () => {
+        const user = {
+            username: 'xx',
+            name: 'Anh Tu Mai',
+            password: 'xxpassword',
+        }
+        await api.post('/api/users').send(user).expect(400)
+    })
+})
 afterAll(() => {
     mongoose.connection.close()
 })
