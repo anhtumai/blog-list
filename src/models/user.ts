@@ -5,6 +5,7 @@ export interface UserDocument extends mongoose.Document {
     username: string
     name: string
     passwordHash: string
+    blogs: string[]
 }
 
 const userSchema = new mongoose.Schema<UserDocument>({
@@ -22,6 +23,12 @@ const userSchema = new mongoose.Schema<UserDocument>({
         type: String,
         required: true,
     },
+    blogs: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Blog',
+        },
+    ],
 })
 
 userSchema.plugin(uniqueValidator)
@@ -36,6 +43,6 @@ userSchema.set('toJSON', {
     },
 })
 
-const UserModel = mongoose.model('User', userSchema)
+const UserModel = mongoose.model<UserDocument>('User', userSchema)
 
 export default UserModel

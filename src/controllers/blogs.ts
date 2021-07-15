@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import BlogModel from '../models/blog'
+import UserModel, { UserDocument } from '../models/user'
 
 import logger from '../utils/logger'
 
@@ -7,7 +8,10 @@ const blogsRouter = Router()
 
 blogsRouter.get('/', async (req, res) => {
     try {
-        const blogs = await BlogModel.find({})
+        const blogs = await BlogModel.find({}).populate('user', {
+            username: 1,
+            name: 1,
+        })
         return res.json(blogs)
     } catch (err) {
         return res.status(500).end()
@@ -15,11 +19,37 @@ blogsRouter.get('/', async (req, res) => {
 })
 
 blogsRouter.post('/', async (req, res) => {
-    const blog = new BlogModel(req.body)
+    const body = req.body
+
+    if (body.userId === undefined) {
+        return res.status(400).json({ error: 'User Id is missing' })
+    }
+
+    let user: UserDocument
 
     try {
-        const result = await blog.save()
-        return res.status(201).json(result)
+        user = await UserModel.findById(body.userId)
+        if (user === null) {
+            logger.error(`User ID ${body.userId} not found`)
+            return res.status(404).end()
+        }
+    } catch (err) {
+        logger.error(err.message)
+        return res.status(400).end()
+    }
+    const blog = new BlogModel({
+        title: body.title,
+        author: body.author,
+        url: body.url,
+        likes: body.likes,
+        user: user._id,
+    })
+
+    try {
+        const savedBlog = await blog.save()
+        user.blogs = user.blogs.concat(savedBlog._id)
+        await user.save()
+        return res.status(201).json(savedBlog)
     } catch (err) {
         logger.error(err.message)
         return res.status(400).end()

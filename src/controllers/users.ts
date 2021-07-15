@@ -7,7 +7,12 @@ const usersRouter = Router()
 
 usersRouter.get('/', async (req, res) => {
     try {
-        const users = await UserModel.find({})
+        const users = await UserModel.find({}).populate('blogs', {
+            title: 1,
+            author: 1,
+            url: 1,
+            likes: 1,
+        })
         return res.json(users)
     } catch (err) {
         return res.status(500).end()

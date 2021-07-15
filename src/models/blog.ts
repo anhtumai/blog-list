@@ -5,6 +5,7 @@ export interface BlogDocument extends mongoose.Document {
     author: string
     url: string
     likes: number
+    user: string
 }
 
 const blogSchema = new mongoose.Schema<BlogDocument>({
@@ -25,6 +26,10 @@ const blogSchema = new mongoose.Schema<BlogDocument>({
         type: Number,
         default: 0,
     },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
 })
 
 blogSchema.set('toJSON', {
@@ -35,6 +40,6 @@ blogSchema.set('toJSON', {
     },
 })
 
-const BlogModel = mongoose.model('Blog', blogSchema)
+const BlogModel = mongoose.model<BlogDocument>('Blog', blogSchema)
 
 export default BlogModel
