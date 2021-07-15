@@ -4,6 +4,7 @@ import cors from 'cors'
 
 import blogsRouter from './controllers/blogs'
 import usersRouter from './controllers/users'
+import loginRouter from './controllers/login'
 
 import config from './utils/config'
 import logger from './utils/logger'
@@ -31,5 +32,6 @@ app.use(express.json())
 
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
 
 export default app
