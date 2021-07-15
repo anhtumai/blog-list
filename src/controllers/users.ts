@@ -21,6 +21,10 @@ usersRouter.post('/', async (req, res) => {
         return res.status(400).json({ error: 'Password is missing' })
     }
 
+    if (body.password.length < 3) {
+        return res.status(400).json({ error: 'Password is too short' })
+    }
+
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(body.password, saltRounds)
 
@@ -35,7 +39,7 @@ usersRouter.post('/', async (req, res) => {
         return res.status(201).json(result)
     } catch (err) {
         logger.error(err.message)
-        return res.status(400).end()
+        return res.status(400).json({ error: err.message })
     }
 })
 
