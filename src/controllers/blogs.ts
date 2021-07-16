@@ -1,4 +1,4 @@
-import { Router, Request } from 'express'
+import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 
 import BlogModel from '../models/blog'
@@ -30,15 +30,13 @@ blogsRouter.post('/', async (req, res, next) => {
         }
         decodedToken = jwt.verify((req as any).token, process.env.SECRET)
         if (typeof decodedToken === 'string') {
-            throw new jwt.JsonWebTokenError('Invalid Token')
+            throw new jwt.JsonWebTokenError('Token is invalid')
         }
     } catch (err) {
-        next(err)
-        return
+        return next(err)
     }
 
     let user: UserDocument
-
     try {
         user = await UserModel.findById((decodedToken as jwt.JwtPayload).id)
         if (user === null) {
@@ -76,9 +74,8 @@ blogsRouter.delete('/:id', async (req, res) => {
         if (deletedBlog) {
             return res.status(204).end()
         } else {
-            return res
-                .status(404)
-                .json({ error: `Record with ${id} does not exist` })
+            const errorMessage = `Record with ${id} does not exist`
+            return res.status(404).json({ error: errorMessage })
         }
     } catch (err) {
         logger.error(err.message)
@@ -95,7 +92,9 @@ blogsRouter.put('/:id', async (req, res) => {
         title === undefined ||
         likes === undefined
     ) {
-        return res.status(400).json({ error: 'Info is missing' })
+        const errorMessage = 'Info is missing'
+        logger.error(errorMessage)
+        return res.status(400).json({ error: errorMessage })
     }
 
     const { id } = req.params
@@ -109,6 +108,7 @@ blogsRouter.put('/:id', async (req, res) => {
         if (updatedBlog) {
             return res.status(201).json(updatedBlog)
         } else {
+            logger.error(`Record with ${id} does not exist`)
             return res.status(404).end()
         }
     } catch (err) {
