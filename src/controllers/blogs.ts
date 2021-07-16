@@ -1,4 +1,5 @@
 import { Router, Request } from 'express'
+import { request } from 'http'
 import jwt from 'jsonwebtoken'
 
 import BlogModel from '../models/blog'
@@ -7,14 +8,6 @@ import UserModel, { UserDocument } from '../models/user'
 import logger from '../utils/logger'
 
 const blogsRouter = Router()
-
-function getTokenFrom(request: Request): string {
-    const authorization = request.get('authorization')
-    if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-        return authorization.substring(7)
-    }
-    return ''
-}
 
 blogsRouter.get('/', async (req, res) => {
     try {
@@ -31,13 +24,14 @@ blogsRouter.get('/', async (req, res) => {
 blogsRouter.post('/', async (req, res, next) => {
     const body = req.body
 
-    const token = getTokenFrom(req)
-
     let decodedToken: string | jwt.JwtPayload
     try {
-        decodedToken = jwt.verify(token, process.env.SECRET)
-        if (token === '' || typeof decodedToken === 'string') {
-            throw new Error('Invalid Token')
+        if ((req as any).token === undefined) {
+            throw new jwt.JsonWebTokenError('Token missing')
+        }
+        decodedToken = jwt.verify((req as any).token, process.env.SECRET)
+        if (typeof decodedToken === 'string') {
+            throw new jwt.JsonWebTokenError('Invalid Token')
         }
     } catch (err) {
         next(err)

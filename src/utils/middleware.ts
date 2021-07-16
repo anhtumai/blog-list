@@ -37,8 +37,21 @@ function errorHandler(
     next(error)
 }
 
+function tokenExtractor(
+    request: Request,
+    response: Response,
+    next: NextFunction
+) {
+    const authorization = request.get('authorization')
+    if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+        (request as any).token = authorization.substring(7)
+    }
+    next()
+}
+
 export default {
     requestLogger,
+    tokenExtractor,
     unknownEndpoint,
     errorHandler,
 }
