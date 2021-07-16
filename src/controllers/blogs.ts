@@ -1,10 +1,20 @@
-import { Router } from 'express'
+import { Router, Request } from 'express'
+import jwt from 'jsonwebtoken'
+
 import BlogModel from '../models/blog'
 import UserModel, { UserDocument } from '../models/user'
 
 import logger from '../utils/logger'
 
 const blogsRouter = Router()
+
+function getTokenFrom(request: Request): string {
+    const authorization = request.get('authorization')
+    if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+        return authorization.substring(7)
+    }
+    return ''
+}
 
 blogsRouter.get('/', async (req, res) => {
     try {
@@ -21,14 +31,23 @@ blogsRouter.get('/', async (req, res) => {
 blogsRouter.post('/', async (req, res) => {
     const body = req.body
 
-    if (body.userId === undefined) {
-        return res.status(400).json({ error: 'User Id is missing' })
+    const token = getTokenFrom(req)
+
+    let decodedToken: string | jwt.JwtPayload
+    try {
+        decodedToken = jwt.verify(token, process.env.SECRET)
+        if (token === '' || typeof decodedToken === 'string') {
+            throw new Error('Invalid Token')
+        }
+    } catch (err) {
+        logger.error(err.message)
+        return res.status(401).json({ error: 'token missing or invalid' })
     }
 
     let user: UserDocument
 
     try {
-        user = await UserModel.findById(body.userId)
+        user = await UserModel.findById((decodedToken as jwt.JwtPayload).id)
         if (user === null) {
             logger.error(`User ID ${body.userId} not found`)
             return res.status(404).end()
