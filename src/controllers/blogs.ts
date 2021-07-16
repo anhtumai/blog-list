@@ -28,7 +28,7 @@ blogsRouter.get('/', async (req, res) => {
     }
 })
 
-blogsRouter.post('/', async (req, res) => {
+blogsRouter.post('/', async (req, res, next) => {
     const body = req.body
 
     const token = getTokenFrom(req)
@@ -40,8 +40,8 @@ blogsRouter.post('/', async (req, res) => {
             throw new Error('Invalid Token')
         }
     } catch (err) {
-        logger.error(err.message)
-        return res.status(401).json({ error: 'token missing or invalid' })
+        next(err)
+        return
     }
 
     let user: UserDocument
