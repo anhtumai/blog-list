@@ -1,5 +1,4 @@
 import { Router, Request } from 'express'
-import { request } from 'http'
 import jwt from 'jsonwebtoken'
 
 import BlogModel from '../models/blog'
