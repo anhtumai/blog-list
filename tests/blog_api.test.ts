@@ -11,6 +11,8 @@ const api = supertest(app)
 
 let token = ''
 
+const invalidToken = 'invalidToken'
+
 beforeAll(async () => {
     await UserModel.deleteMany({})
     for (const user of initialUsers) {
@@ -86,6 +88,24 @@ describe('Test POST request on /api/blogs', () => {
         expect(currentBlogs).toHaveLength(initialBlogs.length + 1)
     })
 
+    test('if length of blogs does not increase when making a post request with invalid token or missing token', async () => {
+        const newBlog = {
+            title: 'FP vs. OO',
+            author: 'Robert C. Martin',
+            url: 'https://blog.cleancoder.com/uncle-bob/2018/04/13/FPvsOO.html',
+            likes: 8,
+        }
+
+        await api
+            .post('/api/blogs')
+            .set('Authorization', 'Bearer ' + invalidToken)
+            .send(newBlog)
+            .expect(401)
+        await api.post('/api/blogs').send(newBlog).expect(401)
+
+        const currentBlogs = await BlogModel.find({})
+        expect(currentBlogs).toHaveLength(initialBlogs.length)
+    })
     test('if likes property is missing when making a post request, it will default to 0', async () => {
         const newBlog = {
             title: 'FP vs. OO',
