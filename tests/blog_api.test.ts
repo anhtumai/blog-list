@@ -9,7 +9,8 @@ import initialUsers from './users'
 
 const api = supertest(app)
 
-let token = ''
+let hellasToken = ''
+let mluukkaiToken = ''
 
 const invalidToken = 'invalidToken'
 
@@ -23,8 +24,10 @@ beforeAll(async () => {
         username: 'hellas',
         password: 'hellaspassword',
     }
-    const response = await api.post('/api/login').send(loginUser)
-    token = response.body.token
+    const hellasLoginResponse = await api.post('/api/login').send(loginUser)
+    hellasToken = hellasLoginResponse.body.token
+    const mluukaiLoginResponse = await api.post('/api/login').send(loginUser)
+    mluukkaiToken = mluukaiLoginResponse.body.token
 })
 
 beforeEach(async () => {
@@ -79,7 +82,7 @@ describe('Test POST request on /api/blogs', () => {
 
         const response = await api
             .post('/api/blogs')
-            .set('Authorization', 'Bearer ' + token)
+            .set('Authorization', 'Bearer ' + hellasToken)
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -115,7 +118,7 @@ describe('Test POST request on /api/blogs', () => {
 
         const response = await api
             .post('/api/blogs')
-            .set('Authorization', 'Bearer ' + token)
+            .set('Authorization', 'Bearer ' + hellasToken)
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -137,32 +140,68 @@ describe('Test POST request on /api/blogs', () => {
 
         await api
             .post('/api/blogs')
-            .set('Authorization', 'Bearer ' + token)
+            .set('Authorization', 'Bearer ' + hellasToken)
             .send(missingBlog1)
             .expect(400)
         await api
             .post('/api/blogs')
-            .set('Authorization', 'Bearer ' + token)
+            .set('Authorization', 'Bearer ' + hellasToken)
             .send(missingBlog2)
             .expect(400)
     })
 })
 
 describe('Test DELETE request', () => {
-    test('DELETE request', async () => {
+    test('DELETE request with invalid/forbidden token', async () => {
         const bookName = 'React patterns'
 
         const deletedBlogs = await BlogModel.find({ title: bookName })
         const deletedId = deletedBlogs[0]._id
-        await api.delete(`/api/blogs/${deletedId}`).expect(204)
+
+        // delete without token will return 401
+        await api.delete(`/api/blogs/${deletedId}`).expect(401)
+
+        // delete with mluukkai token will return 403
+        await api
+            .delete(`/api/blogs/${deletedId}`)
+            .set('Authorization', 'Bearer ' + invalidToken)
+            .expect(401)
+
+        // delete with mluukkai token will return 403
+        await api
+            .delete(`/api/blogs/${deletedId}`)
+            .set('Authorization', 'Bearer ' + mluukkaiToken)
+            .expect(403)
+
+        // check if book with that name still present
+        const checkedBlogs = await BlogModel.find({ title: bookName })
+        expect(checkedBlogs).toHaveLength(1)
+    })
+    test('DELETE request with valid token', async () => {
+        const bookName = 'React patterns'
+
+        const deletedBlogs = await BlogModel.find({ title: bookName })
+        const deletedId = deletedBlogs[0]._id
+
+        // delete with mluukkai token will return 403
+        await api
+            .delete(`/api/blogs/${deletedId}`)
+            .set('Authorization', 'Bearer ' + hellasToken)
+            .expect(403)
 
         // check if no book with that name is present
         const checkedBlogs = await BlogModel.find({ title: bookName })
         expect(checkedBlogs).toHaveLength(0)
 
-        await api.delete(`/api/blogs/${deletedId}`).expect(404)
+        await api
+            .delete(`/api/blogs/${deletedId}`)
+            .set('Authorization', 'Bearer ' + hellasToken)
+            .expect(404)
 
-        await api.delete('/api/blogs/invalid-id').expect(400)
+        await api
+            .delete('/api/blogs/invalid-id')
+            .set('Authorization', 'Bearer ' + hellasToken)
+            .expect(400)
     })
 })
 
