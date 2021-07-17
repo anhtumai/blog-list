@@ -4,21 +4,9 @@ import bcrypt from 'bcrypt'
 
 import app from '../src/app'
 import UserModel from '../src/models/user'
+import initialUsers from './users'
 
 const api = supertest(app)
-
-const initialUsers = [
-    {
-        username: 'hellas',
-        name: 'Arto Hellas',
-        password: 'hellaspassword',
-    },
-    {
-        username: 'mluukkai',
-        name: 'matti Luukainen',
-        password: 'mluukkaipassword',
-    },
-]
 
 const saltRounds = 10
 

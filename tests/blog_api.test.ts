@@ -3,9 +3,27 @@ import supertest from 'supertest'
 
 import app from '../src/app'
 import BlogModel from '../src/models/blog'
+import UserModel from '../src/models/user'
 import initialBlogs from './blogs'
+import initialUsers from './users'
 
 const api = supertest(app)
+
+let token = ''
+
+beforeAll(async () => {
+    await UserModel.deleteMany({})
+    for (const user of initialUsers) {
+        await api.post('/api/users').send(user)
+    }
+
+    const loginUser = {
+        username: 'hellas',
+        password: 'hellaspassword',
+    }
+    const response = await api.post('/api/login').send(loginUser)
+    token = response.body.token
+})
 
 beforeEach(async () => {
     await BlogModel.deleteMany({})
@@ -59,6 +77,7 @@ describe('Test POST request on /api/blogs', () => {
 
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', 'Bearer ' + token)
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -76,6 +95,7 @@ describe('Test POST request on /api/blogs', () => {
 
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', 'Bearer ' + token)
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -95,8 +115,16 @@ describe('Test POST request on /api/blogs', () => {
             url: 'https://blog.cleancoder.com/uncle-bob/2018/04/13/FPvsOO.html',
         }
 
-        await api.post('/api/blogs').send(missingBlog1).expect(400)
-        await api.post('/api/blogs').send(missingBlog2).expect(400)
+        await api
+            .post('/api/blogs')
+            .set('Authorization', 'Bearer ' + token)
+            .send(missingBlog1)
+            .expect(400)
+        await api
+            .post('/api/blogs')
+            .set('Authorization', 'Bearer ' + token)
+            .send(missingBlog2)
+            .expect(400)
     })
 })
 
