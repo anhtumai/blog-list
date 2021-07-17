@@ -1,7 +1,6 @@
 import { Router } from 'express'
 import bcrypt from 'bcrypt'
 import UserModel from '../models/user'
-import logger from '../utils/logger'
 
 const usersRouter = Router()
 
@@ -19,7 +18,7 @@ usersRouter.get('/', async (req, res) => {
     }
 })
 
-usersRouter.post('/', async (req, res) => {
+usersRouter.post('/', async (req, res, next) => {
     const body = req.body
 
     if (body.password === undefined) {
@@ -43,8 +42,7 @@ usersRouter.post('/', async (req, res) => {
         const result = await user.save()
         return res.status(201).json(result)
     } catch (err) {
-        logger.error(err.message)
-        return res.status(400).json({ error: err.message })
+        next(err)
     }
 })
 
