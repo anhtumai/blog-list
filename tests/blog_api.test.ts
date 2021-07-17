@@ -20,21 +20,33 @@ beforeAll(async () => {
         await api.post('/api/users').send(user)
     }
 
-    const loginUser = {
+    const hellasLoginUser = {
         username: 'hellas',
         password: 'hellaspassword',
     }
-    const hellasLoginResponse = await api.post('/api/login').send(loginUser)
+
+    const mluukkaiLoginUser = {
+        username: 'mluukkai',
+        password: 'mluukkaipassword',
+    }
+
+    const hellasLoginResponse = await api
+        .post('/api/login')
+        .send(hellasLoginUser)
     hellasToken = hellasLoginResponse.body.token
-    const mluukaiLoginResponse = await api.post('/api/login').send(loginUser)
+    const mluukaiLoginResponse = await api
+        .post('/api/login')
+        .send(mluukkaiLoginUser)
     mluukkaiToken = mluukaiLoginResponse.body.token
 })
 
 beforeEach(async () => {
     await BlogModel.deleteMany({})
     for (const blog of initialBlogs) {
-        const blogObject = new BlogModel(blog)
-        await blogObject.save()
+        await api
+            .post('/api/blogs')
+            .set('Authorization', 'Bearer ' + hellasToken)
+            .send(blog)
     }
 })
 
@@ -187,7 +199,7 @@ describe('Test DELETE request', () => {
         await api
             .delete(`/api/blogs/${deletedId}`)
             .set('Authorization', 'Bearer ' + hellasToken)
-            .expect(403)
+            .expect(204)
 
         // check if no book with that name is present
         const checkedBlogs = await BlogModel.find({ title: bookName })

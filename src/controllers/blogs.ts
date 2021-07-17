@@ -27,7 +27,7 @@ blogsRouter.post('/', async (req, res, next) => {
 
     let user: UserDocument
     try {
-        user = await helper.getUserFromToken(req as any)
+        user = await helper.getUserFromToken(req)
     } catch (err) {
         return next(err)
     }
@@ -54,15 +54,36 @@ blogsRouter.post('/', async (req, res, next) => {
 blogsRouter.delete('/:id', async (req, res, next) => {
     const { id } = req.params
 
+    let userFromToken: UserDocument
     try {
-        const deletedBlog = await BlogModel.findByIdAndRemove(id)
+        userFromToken = await helper.getUserFromToken(req)
+    } catch (err) {
+        return next(err)
+    }
+
+    try {
+        const deletedBlog = await BlogModel.findById(id)
+
         if (deletedBlog) {
-            return res.status(204).end()
+            console.log(
+                'checktythoi',
+                deletedBlog.user,
+                userFromToken.id,
+                deletedBlog
+            )
+            if (deletedBlog.user.toString() === userFromToken.id.toString()) {
+                await BlogModel.deleteOne({ _id: id })
+                return res.status(204).end()
+            } else {
+                throw new ClientError(403, 'User is forbidden to delete post')
+            }
         } else {
             throw new ClientError(404, `Record with ${id} does not exist`)
         }
+
+        // hmmm
     } catch (err) {
-        return next(err)
+        next(err)
     }
 })
 

@@ -8,14 +8,17 @@ interface RequestWithToken extends Request {
     token: string
 }
 
-async function getUserFromToken(request: RequestWithToken) {
+async function getUserFromToken(request: Request) {
     const body = request.body
 
-    if (request.token === undefined) {
+    if ((request as RequestWithToken).token === undefined) {
         throw new jwt.JsonWebTokenError('Token missing')
     }
 
-    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    const decodedToken = jwt.verify(
+        (request as RequestWithToken).token,
+        process.env.SECRET
+    )
 
     if (typeof decodedToken === 'string') {
         throw new jwt.JsonWebTokenError('Token is invalid')
