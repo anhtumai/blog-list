@@ -1,5 +1,6 @@
 import logger from './logger'
 import { Request, Response, NextFunction } from 'express'
+import ClientError from './error'
 
 function requestLogger(
     request: Request,
@@ -33,6 +34,10 @@ function errorHandler(
         return response.status(401).json({ error: 'invalid token' })
     } else if (error.name === 'TokenExpiredError') {
         return response.status(401).json({ error: 'token expired' })
+    } else if (error.name === 'ClientError') {
+        return response
+            .status((error as ClientError).statusCode)
+            .json({ error: error.message })
     }
     next(error)
 }

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 
+import ClientError from '../utils/error'
 import BlogModel from '../models/blog'
 import UserModel, { UserDocument } from '../models/user'
 
@@ -40,12 +41,11 @@ blogsRouter.post('/', async (req, res, next) => {
     try {
         user = await UserModel.findById((decodedToken as jwt.JwtPayload).id)
         if (user === null) {
-            logger.error(`User ID ${body.userId} not found`)
-            return res.status(404).end()
+            throw new ClientError(404, `User ID ${body.userId} not found`)
         }
     } catch (err) {
-        logger.error(err.message)
-        return res.status(400).end()
+        console.log(err.name)
+        return next(err)
     }
     const blog = new BlogModel({
         title: body.title,
@@ -61,12 +61,12 @@ blogsRouter.post('/', async (req, res, next) => {
         await user.save()
         return res.status(201).json(savedBlog)
     } catch (err) {
-        logger.error(err.message)
-        return res.status(400).end()
+        console.log(err.name)
+        return next(err)
     }
 })
 
-blogsRouter.delete('/:id', async (req, res) => {
+blogsRouter.delete('/:id', async (req, res, next) => {
     const { id } = req.params
 
     try {
@@ -74,16 +74,14 @@ blogsRouter.delete('/:id', async (req, res) => {
         if (deletedBlog) {
             return res.status(204).end()
         } else {
-            const errorMessage = `Record with ${id} does not exist`
-            return res.status(404).json({ error: errorMessage })
+            throw new ClientError(404, `Record with ${id} does not exist`)
         }
     } catch (err) {
-        logger.error(err.message)
-        return res.status(400).end()
+        return next(err)
     }
 })
 
-blogsRouter.put('/:id', async (req, res) => {
+blogsRouter.put('/:id', async (req, res, next) => {
     const { url, author, title, likes } = req.body
 
     if (
@@ -108,12 +106,10 @@ blogsRouter.put('/:id', async (req, res) => {
         if (updatedBlog) {
             return res.status(201).json(updatedBlog)
         } else {
-            logger.error(`Record with ${id} does not exist`)
-            return res.status(404).end()
+            throw new ClientError(404, `Record with ${id} does not exist`)
         }
     } catch (err) {
-        logger.error(err.message)
-        return res.status(400).end()
+        return next(err)
     }
 })
 
