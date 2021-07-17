@@ -6,6 +6,7 @@ import BlogModel from '../models/blog'
 import UserModel, { UserDocument } from '../models/user'
 
 import logger from '../utils/logger'
+import helper from '../utils/helper'
 
 const blogsRouter = Router()
 
@@ -24,29 +25,13 @@ blogsRouter.get('/', async (req, res) => {
 blogsRouter.post('/', async (req, res, next) => {
     const body = req.body
 
-    let decodedToken: string | jwt.JwtPayload
+    let user: UserDocument
     try {
-        if ((req as any).token === undefined) {
-            throw new jwt.JsonWebTokenError('Token missing')
-        }
-        decodedToken = jwt.verify((req as any).token, process.env.SECRET)
-        if (typeof decodedToken === 'string') {
-            throw new jwt.JsonWebTokenError('Token is invalid')
-        }
+        user = await helper.getUserFromToken(req as any)
     } catch (err) {
         return next(err)
     }
 
-    let user: UserDocument
-    try {
-        user = await UserModel.findById((decodedToken as jwt.JwtPayload).id)
-        if (user === null) {
-            throw new ClientError(404, `User ID ${body.userId} not found`)
-        }
-    } catch (err) {
-        console.log(err.name)
-        return next(err)
-    }
     const blog = new BlogModel({
         title: body.title,
         author: body.author,
