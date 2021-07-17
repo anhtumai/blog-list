@@ -1,6 +1,7 @@
 # Blog list
 
 > Backend for blog list project for course fullstack open 2021. Written in Express (TypeScript)
+
 > Practice TDD on backend development
 
 ## Blogs
@@ -46,4 +47,12 @@
 
 * Update user record by ID
 * Params: `username`, `name`, `password`
+
+## TDD workflow
+
+- Implement "basic" test cases for new feature. These tests should fail.
+- Implement new feature.
+- Fix both source code and test cases (test cases are code after all) along with testing.
+- When tests pass, add new tests for edge cases.
+- Refractor and test continuosly until all test cases pass 
 
