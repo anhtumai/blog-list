@@ -2,12 +2,9 @@ import logger from './logger'
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 
-import ClientError from './error'
+import UserModel from '../models/user'
 
-interface RequestAfterExtract extends Request {
-    token: string
-    userId: string
-}
+import ClientError from './error'
 
 function requestLogger(
     request: Request,
@@ -61,27 +58,31 @@ function tokenExtractor(
     next()
 }
 
-function userExtractor(
+async function userExtractor(
     request: Request,
     response: Response,
     next: NextFunction
 ) {
-    if ((request as RequestAfterExtract).token === undefined) {
-        throw new jwt.JsonWebTokenError('Token missing')
+    try {
+        if ((request as any).token === undefined) {
+            throw new jwt.JsonWebTokenError('Token missing')
+        }
+
+        const decodedToken = jwt.verify(
+            (request as any).token,
+            process.env.SECRET
+        )
+
+        if (typeof decodedToken === 'string') {
+            throw new jwt.JsonWebTokenError('Token is invalid')
+        }
+
+        const userId = (decodedToken as jwt.JwtPayload).id
+
+        ;(request as any).user = await UserModel.findById(userId)
+    } catch (err) {
+        return next(err)
     }
-
-    const decodedToken = jwt.verify(
-        (request as RequestAfterExtract).token,
-        process.env.SECRET
-    )
-
-    if (typeof decodedToken === 'string') {
-        throw new jwt.JsonWebTokenError('Token is invalid')
-    }
-
-    (request as RequestAfterExtract).userId = (
-        decodedToken as jwt.JwtPayload
-    ).id
 
     next()
 }

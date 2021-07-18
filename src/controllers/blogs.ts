@@ -1,11 +1,16 @@
-import { Router } from 'express'
+import { Router, Request } from 'express'
 
 import BlogModel from '../models/blog'
-import UserModel, { UserDocument } from '../models/user'
+import { UserDocument } from '../models/user'
 
 import middleware from '../utils/middleware'
 import ClientError from '../utils/error'
 import logger from '../utils/logger'
+
+interface RequestAfterExtract extends Request {
+    token: string
+    user: UserDocument
+}
 
 const blogsRouter = Router()
 
@@ -24,12 +29,7 @@ blogsRouter.get('/', async (req, res) => {
 blogsRouter.post('/', middleware.userExtractor, async (req, res, next) => {
     const body = req.body
 
-    let user: UserDocument
-    try {
-        user = await UserModel.findById((req as any).userId)
-    } catch (err) {
-        return next(err)
-    }
+    const user = (req as RequestAfterExtract).user
 
     const blog = new BlogModel({
         title: body.title,
@@ -52,23 +52,12 @@ blogsRouter.post('/', middleware.userExtractor, async (req, res, next) => {
 blogsRouter.delete('/:id', middleware.userExtractor, async (req, res, next) => {
     const { id } = req.params
 
-    let userFromToken: UserDocument
-    try {
-        userFromToken = await UserModel.findById((req as any).userId)
-    } catch (err) {
-        return next(err)
-    }
+    const userFromToken = (req as RequestAfterExtract).user
 
     try {
         const deletedBlog = await BlogModel.findById(id)
 
         if (deletedBlog) {
-            console.log(
-                'checktythoi',
-                deletedBlog.user,
-                userFromToken.id,
-                deletedBlog
-            )
             if (deletedBlog.user.toString() === userFromToken.id.toString()) {
                 await BlogModel.deleteOne({ _id: id })
                 return res.status(204).end()
