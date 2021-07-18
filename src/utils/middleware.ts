@@ -1,6 +1,13 @@
 import logger from './logger'
 import { Request, Response, NextFunction } from 'express'
+import jwt from 'jsonwebtoken'
+
 import ClientError from './error'
+
+interface RequestAfterExtract extends Request {
+    token: string
+    userId: string
+}
 
 function requestLogger(
     request: Request,
@@ -19,7 +26,7 @@ function unknownEndpoint(request: Request, response: Response) {
 }
 
 function errorHandler(
-    error: any,
+    error: Error,
     request: Request,
     response: Response,
     next: NextFunction
@@ -54,8 +61,34 @@ function tokenExtractor(
     next()
 }
 
+function userExtractor(
+    request: Request,
+    response: Response,
+    next: NextFunction
+) {
+    if ((request as RequestAfterExtract).token === undefined) {
+        throw new jwt.JsonWebTokenError('Token missing')
+    }
+
+    const decodedToken = jwt.verify(
+        (request as RequestAfterExtract).token,
+        process.env.SECRET
+    )
+
+    if (typeof decodedToken === 'string') {
+        throw new jwt.JsonWebTokenError('Token is invalid')
+    }
+
+    (request as RequestAfterExtract).userId = (
+        decodedToken as jwt.JwtPayload
+    ).id
+
+    next()
+}
+
 export default {
     requestLogger,
+    userExtractor,
     tokenExtractor,
     unknownEndpoint,
     errorHandler,

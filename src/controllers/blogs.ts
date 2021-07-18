@@ -1,12 +1,11 @@
 import { Router } from 'express'
-import jwt from 'jsonwebtoken'
 
-import ClientError from '../utils/error'
 import BlogModel from '../models/blog'
 import UserModel, { UserDocument } from '../models/user'
 
+import middleware from '../utils/middleware'
+import ClientError from '../utils/error'
 import logger from '../utils/logger'
-import helper from '../utils/helper'
 
 const blogsRouter = Router()
 
@@ -22,12 +21,12 @@ blogsRouter.get('/', async (req, res) => {
     }
 })
 
-blogsRouter.post('/', async (req, res, next) => {
+blogsRouter.post('/', middleware.userExtractor, async (req, res, next) => {
     const body = req.body
 
     let user: UserDocument
     try {
-        user = await helper.getUserFromToken(req)
+        user = await UserModel.findById((req as any).userId)
     } catch (err) {
         return next(err)
     }
@@ -46,17 +45,16 @@ blogsRouter.post('/', async (req, res, next) => {
         await user.save()
         return res.status(201).json(savedBlog)
     } catch (err) {
-        console.log(err.name)
         return next(err)
     }
 })
 
-blogsRouter.delete('/:id', async (req, res, next) => {
+blogsRouter.delete('/:id', middleware.userExtractor, async (req, res, next) => {
     const { id } = req.params
 
     let userFromToken: UserDocument
     try {
-        userFromToken = await helper.getUserFromToken(req)
+        userFromToken = await UserModel.findById((req as any).userId)
     } catch (err) {
         return next(err)
     }
