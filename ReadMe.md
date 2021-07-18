@@ -1,8 +1,18 @@
 # Blog list
 
-> Backend for blog list project for course fullstack open 2021. Written in Express (TypeScript)
+> Backend for blog list project for course fullstack open 2021.
+Written in Express (TypeScript)
 
-> Practice TDD on backend development
+Practice TDD on backend development
+
+## Login
+
+`/api/login` - **POST**
+
+* Perform login with username and password.
+Get a bearer token after successful login.
+
+* Params: `username`, `password`
 
 ## Blogs
 
@@ -37,15 +47,6 @@
 `/api/users` - **POST**
 
 * Add new user record
-* Params: `username`, `name`, `password` 
-
-`/api/users/<string:user_id>` - **DELETE**
-
-* Delete user record by ID
-
-`/api/users/<string:user_id>` - **PUT**
-
-* Update user record by ID
 * Params: `username`, `name`, `password`
 
 ## TDD workflow
