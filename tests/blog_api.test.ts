@@ -92,7 +92,7 @@ describe('Test POST request on /api/blogs', () => {
             likes: 8,
         }
 
-        const response = await api
+        await api
             .post('/api/blogs')
             .set('Authorization', 'Bearer ' + hellasToken)
             .send(newBlog)
