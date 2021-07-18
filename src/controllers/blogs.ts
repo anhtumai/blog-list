@@ -5,7 +5,6 @@ import { UserDocument } from '../models/user'
 
 import middleware from '../utils/middleware'
 import ClientError from '../utils/error'
-import logger from '../utils/logger'
 
 interface RequestAfterExtract extends Request {
     token: string
@@ -75,25 +74,14 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (req, res, next) => {
 })
 
 blogsRouter.put('/:id', async (req, res, next) => {
-    const { url, author, title, likes } = req.body
-
-    if (
-        url === undefined ||
-        author === undefined ||
-        title === undefined ||
-        likes === undefined
-    ) {
-        const errorMessage = 'Info is missing'
-        logger.error(errorMessage)
-        return res.status(400).json({ error: errorMessage })
-    }
+    const newBlogInfo = req.body
 
     const { id } = req.params
 
     try {
         const updatedBlog = await BlogModel.findOneAndUpdate(
             { _id: id },
-            { url, author, title, likes },
+            newBlogInfo,
             { new: true }
         )
         if (updatedBlog) {
