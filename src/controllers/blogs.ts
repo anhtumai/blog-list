@@ -5,6 +5,7 @@ import { UserDocument } from '../models/user'
 
 import middleware from '../utils/middleware'
 import ClientError from '../utils/error'
+import logger from '../utils/logger'
 
 interface RequestAfterExtract extends Request {
     token: string
@@ -21,6 +22,7 @@ blogsRouter.get('/', async (req, res) => {
         })
         return res.json(blogs)
     } catch (err) {
+        logger.error(err.message)
         return res.status(500).end()
     }
 })
@@ -31,10 +33,7 @@ blogsRouter.post('/', middleware.userExtractor, async (req, res, next) => {
     const user = (req as RequestAfterExtract).user
 
     const blog = new BlogModel({
-        title: body.title,
-        author: body.author,
-        url: body.url,
-        likes: body.likes,
+        ...body,
         user: user._id,
     })
 
@@ -44,7 +43,7 @@ blogsRouter.post('/', middleware.userExtractor, async (req, res, next) => {
         await user.save()
         return res.status(201).json(savedBlog)
     } catch (err) {
-        return next(err)
+        next(err)
     }
 })
 
