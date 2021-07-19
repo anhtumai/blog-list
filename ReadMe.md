@@ -5,6 +5,8 @@ Written in Express (TypeScript)
 
 Practice TDD on backend development
 
+[Heroku link](https://blog-list-backend.herokuapp.com/api/blogs)
+
 ## Login
 
 `/api/login` - **POST**
@@ -48,6 +50,18 @@ Get a bearer token after successful login.
 
 * Add new user record
 * Params: `username`, `name`, `password`
+
+## Running program
+
+```bash
+npm i
+
+// Run the test cases
+npm run test
+
+// Run the main program
+npm start
+```
 
 ## TDD workflow
 
