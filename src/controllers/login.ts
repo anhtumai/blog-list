@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import { Router } from 'express'
 
 import UserModel from '../models/user'
+import processClientError from '../utils/error'
 
 const loginRouter = Router()
 
@@ -16,9 +17,7 @@ loginRouter.post('/', async (req, res) => {
             : await bcrypt.compare(body.password, user.passwordHash)
 
     if (!(user && passwordCorrect)) {
-        return res.status(401).json({
-            error: 'Invalid username or password',
-        })
+        return processClientError(res, 401, 'Invalid username or password')
     }
 
     const userForToken = {
