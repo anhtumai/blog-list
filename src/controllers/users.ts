@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import bcrypt from 'bcrypt'
+
 import UserModel from '../models/user'
+import processClientError from '../utils/error'
 
 const usersRouter = Router()
 
@@ -21,12 +23,12 @@ usersRouter.get('/', async (req, res) => {
 usersRouter.post('/', async (req, res, next) => {
     const body = req.body
 
-    if (body.password === undefined) {
-        return res.status(400).json({ error: 'Password is missing' })
+    if (!body.password) {
+        return processClientError(res, 400, 'Password is missing')
     }
 
     if (body.password.length < 3) {
-        return res.status(400).json({ error: 'Password is too short' })
+        return processClientError(res, 400, 'Password is too short')
     }
 
     const saltRounds = 10

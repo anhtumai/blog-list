@@ -1,11 +1,13 @@
-class ClientError extends Error {
-    statusCode: number
+import { Response } from 'express'
+import logger from './logger'
 
-    constructor(statusCode: number, message: string) {
-        super(message)
-        this.statusCode = statusCode
-        this.name = 'ClientError'
-    }
+function processClientError(
+    response: Response,
+    statusCode: number,
+    message: string
+) {
+    logger.error('Client Error:', message)
+    response.status(statusCode).json({ error: message })
 }
 
-export default ClientError
+export default processClientError

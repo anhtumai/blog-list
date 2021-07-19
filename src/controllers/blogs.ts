@@ -4,7 +4,7 @@ import BlogModel from '../models/blog'
 import { UserDocument } from '../models/user'
 
 import middleware from '../utils/middleware'
-import ClientError from '../utils/error'
+import processClientError from '../utils/error'
 import logger from '../utils/logger'
 
 interface RequestAfterExtract extends Request {
@@ -60,10 +60,18 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (req, res, next) => {
                 await BlogModel.deleteOne({ _id: id })
                 return res.status(204).end()
             } else {
-                throw new ClientError(403, 'User is forbidden to delete post')
+                return processClientError(
+                    res,
+                    403,
+                    'User is forbidden to delete post'
+                )
             }
         } else {
-            throw new ClientError(404, `Record with ${id} does not exist`)
+            return processClientError(
+                res,
+                404,
+                `Record with ${id} does not exist`
+            )
         }
 
         // hmmm
@@ -86,7 +94,11 @@ blogsRouter.put('/:id', async (req, res, next) => {
         if (updatedBlog) {
             return res.status(201).json(updatedBlog)
         } else {
-            throw new ClientError(404, `Record with ${id} does not exist`)
+            return processClientError(
+                res,
+                404,
+                `Record with ${id} does not exist`
+            )
         }
     } catch (err) {
         return next(err)
