@@ -5,7 +5,7 @@ Written in Express (TypeScript)
 
 Practice TDD on backend development
 
-[Heroku link](https://blog-list-backend.herokuapp.com/api/blogs)
+[Public link](https://blog-list-backend-l3isj.ondigitalocean.app/api/blogs)
 
 ## Login
 
