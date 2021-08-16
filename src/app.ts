@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 import cors from 'cors'
 
 import blogsRouter from './controllers/blogs'
+import commentsRouter from './controllers/comments'
 import usersRouter from './controllers/users'
 import loginRouter from './controllers/login'
 import testingRouter from './controllers/testing'
@@ -36,6 +37,7 @@ app.use(middleware.requestLogger)
 app.use(middleware.tokenExtractor)
 
 app.use('/api/blogs', blogsRouter)
+app.use('/api/blogs', commentsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/login', loginRouter)
 app.use('/api/testing', testingRouter)

@@ -4,12 +4,10 @@ import jwt from 'jsonwebtoken'
 
 import UserModel from '../models/user'
 
-import ClientError from './error'
-
 function requestLogger(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
 ) {
     logger.info('Method:', request.method)
     logger.info('Path:  ', request.path)
@@ -26,7 +24,7 @@ function errorHandler(
     error: Error,
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
 ) {
     logger.error(error.message)
 
@@ -39,13 +37,14 @@ function errorHandler(
     } else if (error.name === 'TokenExpiredError') {
         return response.status(401).json({ error: 'token expired' })
     }
+    console.log('Missing err', error)
     next(error)
 }
 
 function tokenExtractor(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
 ) {
     const authorization = request.get('authorization')
     if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
@@ -57,7 +56,7 @@ function tokenExtractor(
 async function userExtractor(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
 ) {
     try {
         if ((request as any).token === undefined) {
@@ -66,7 +65,7 @@ async function userExtractor(
 
         const decodedToken = jwt.verify(
             (request as any).token,
-            process.env.SECRET
+            process.env.SECRET,
         )
 
         if (typeof decodedToken === 'string') {

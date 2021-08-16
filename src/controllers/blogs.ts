@@ -16,10 +16,12 @@ const blogsRouter = Router()
 
 blogsRouter.get('/', async (req, res) => {
     try {
-        const blogs = await BlogModel.find({}).populate('user', {
-            username: 1,
-            name: 1,
-        })
+        const blogs = await BlogModel.find({})
+            .populate('user', {
+                username: 1,
+                name: 1,
+            })
+            .populate('comments', { content: 1 })
         return res.json(blogs)
     } catch (err) {
         logger.error(err.message)
@@ -30,7 +32,11 @@ blogsRouter.get('/', async (req, res) => {
 blogsRouter.post('/', middleware.userExtractor, async (req, res, next) => {
     const body = req.body
 
+    console.log('Body debug', body)
+
     const user = (req as RequestAfterExtract).user
+
+    console.log('Debug User', user)
 
     const blog = new BlogModel({
         ...body,
@@ -40,9 +46,13 @@ blogsRouter.post('/', middleware.userExtractor, async (req, res, next) => {
     try {
         const savedBlog = await blog.save()
         user.blogs = user.blogs.concat(savedBlog._id)
+
+        console.log(user)
         await user.save()
+
         return res.status(201).json(savedBlog)
     } catch (err) {
+        console.log(err)
         next(err)
     }
 })
@@ -63,14 +73,14 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (req, res, next) => {
                 return processClientError(
                     res,
                     403,
-                    'User is forbidden to delete post'
+                    'User is forbidden to delete post',
                 )
             }
         } else {
             return processClientError(
                 res,
                 404,
-                `Record with ${id} does not exist`
+                `Record with ${id} does not exist`,
             )
         }
 
@@ -89,7 +99,7 @@ blogsRouter.put('/:id', async (req, res, next) => {
         const updatedBlog = await BlogModel.findOneAndUpdate(
             { _id: id },
             newBlogInfo,
-            { new: true }
+            { new: true },
         )
         if (updatedBlog) {
             return res.status(201).json(updatedBlog)
@@ -97,7 +107,7 @@ blogsRouter.put('/:id', async (req, res, next) => {
             return processClientError(
                 res,
                 404,
-                `Record with ${id} does not exist`
+                `Record with ${id} does not exist`,
             )
         }
     } catch (err) {

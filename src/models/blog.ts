@@ -6,6 +6,7 @@ export interface BlogDocument extends mongoose.Document {
     url: string
     likes: number
     user: string
+    comments: string[]
 }
 
 const blogSchema = new mongoose.Schema<BlogDocument>({
@@ -30,6 +31,12 @@ const blogSchema = new mongoose.Schema<BlogDocument>({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    comments: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Comment',
+        },
+    ],
 })
 
 blogSchema.set('toJSON', {
