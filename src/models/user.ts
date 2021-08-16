@@ -8,7 +8,7 @@ export interface UserDocument extends mongoose.Document {
     blogs: string[]
 }
 
-const userSchema = new mongoose.Schema<UserDocument>({
+const userSchema = new mongoose.Schema({
     username: {
         type: String,
         minlength: 3,
