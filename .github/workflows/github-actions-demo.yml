@@ -3,7 +3,7 @@ name: "Deploy blog list backend"
 on:
   push:
     branches:
-      - master
+      - containerize
 
 jobs:
   build:
